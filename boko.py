@@ -69,6 +69,10 @@ import threading
 screenlock = threading.Semaphore(value=1)
 
 
+def list_range(*args, **kwargs):
+    return list(range(*args, **kwargs))
+
+
 class mach_header(ctypes.Structure):
     _fields_ = [
         ("magic", ctypes.c_uint),
@@ -116,8 +120,8 @@ class ExecutableScanner:
                                     '/usr/share',
                                     '/usr/standalone',
                                     '/Library/Developer/CommandLineTools/SDKs/']
-        self.uninterestingexts = ['.3pm', '.3', '.3tcl', '.3x', '.3g', '.aiff', '.dll', '.doc', '.dub', '.dylib', '.filters', '.frag', '.gif', '.html', 
-                                  '.icns', '.idm', '.iqy', '.lab', '.lex', '.manifest', '.meta', '.metainfo', 
+        self.uninterestingexts = ['.3pm', '.3', '.3tcl', '.3x', '.3g', '.aiff', '.dll', '.doc', '.dub', '.dylib', '.filters', '.frag', '.gif', '.html',
+                                  '.icns', '.idm', '.iqy', '.lab', '.lex', '.manifest', '.meta', '.metainfo',
                                   '.mp4', '.nls', '.node', '.nrr', '.odf', '.olb', '.plist', '.png', '.ppd', '.ppt', '.pst', '.qml',
                                   '.qmltypes', '.qrc', '.svg', '.tib', '.tiff', '.tlb', '.transition', '.ttc', '.ttf', '.typ',
                                   '.vert', '.wmf', '.xlam', '.xll', '.xls', '.jpg', '.jpeg', '.bmp', '.css', '.tif', '.nib', '.strings', '.tcl', '.wav', '.pcm', '.mp3']
@@ -145,7 +149,7 @@ class ExecutableScanner:
             self.LC_ID_DYLIB, self.LC_LOAD_DYLINKER, self.LC_ID_DYLINKER, self.LC_PREBOUND_DYLIB,
             self.LC_ROUTINES, self.LC_SUB_FRAMEWORK, self.LC_SUB_UMBRELLA, self.LC_SUB_CLIENT,
             self.LC_SUB_LIBRARY, self.LC_TWOLEVEL_HINTS, self.LC_PREBIND_CKSUM
-        ) = range(0x1, 0x18)
+        ) = list_range(0x1, 0x18)
 
         self.MH_MAGIC = 0xfeedface
         self.MH_CIGAM = 0xcefaedfe
@@ -247,7 +251,7 @@ class ExecutableScanner:
     def readWriteCheck(self, rpath):
         # Check if current user context has write permissions to the last existing path
         lastexistingpath = '/'
-        for i in range(2, len(rpath.split('/'))):
+        for i in list_range(2, len(rpath.split('/'))):
             checkpath = '/'.join(rpath.split('/')[0:i])
             if os.path.exists(checkpath):
                 lastexistingpath = checkpath
@@ -454,7 +458,7 @@ class ExecutableScanner:
             else:
                 f.seek(28, io.SEEK_SET)
 
-            for cmd in range(machoHeader.ncmds):
+            for cmd in list_range(machoHeader.ncmds):
                 # handle LC_RPATH's
                 # ->resolve and save
                 # save offset to load commands
@@ -534,7 +538,7 @@ class ExecutableScanner:
              'WriteAccess': contextwriteperm, 'ReadOnlyPartition': readonlypartition, "Mode": mode})
         if certainty == 'Definite' and context != 'ReadOnly':
             if contextwriteperm:
-                indicator = indicator * 3    
+                indicator = indicator * 3
             print("[%s] [%s] [%s] [%s] [%s] [%s] %s" % (indicator, ftype, binary, vulntype, certainty, context, hijackpath))
         else:
             if self.verbose:
@@ -1004,7 +1008,7 @@ class Main():
             self.outputfile = ['log', self.outputstandard]
             sys.stdout = Logger(self.outputfile[1] + '.log')
 
-        
+
 
     def execute(self):
         scanner = ExecutableScanner(self.verbosity, self.sipdisabled)
@@ -1038,13 +1042,13 @@ class Main():
             csvwrite.writeinterestingfiles()
         if self.outputstandard:
             print('[%s] Created %s.log' % ('*', self.outputstandard))
-            
+
     def banner(self):
-        solid_pixel = unichr(0x2588) * 2
-        light_shade_pixel = unichr(0x2591) * 2
-        med_shade_pixel = unichr(0x2592) * 2
-        dark_shade_pixel = unichr(0x2593) * 2
-        blank_pixel = unichr(0x00A0) * 2
+        solid_pixel = chr(0x2588) * 2
+        light_shade_pixel = chr(0x2591) * 2
+        med_shade_pixel = chr(0x2592) * 2
+        dark_shade_pixel = chr(0x2593) * 2
+        blank_pixel = chr(0x00A0) * 2
 
         sp = solid_pixel
         bp = blank_pixel
@@ -1055,16 +1059,16 @@ class Main():
         canvas_dimensions = [19, 19]
 
         #build blank canvas
-        canvas = [[bp] * canvas_dimensions[0] for i in range(canvas_dimensions[1])]
+        canvas = [[bp] * canvas_dimensions[0] for i in list_range(canvas_dimensions[1])]
 
-        fill = [[1, range(4, 14)], 
-                [2, [4] + range(14, 16)],
-                [3, range(5, 8) + [12, 13, 14, 16]],
+        fill = [[1, list_range(4, 14)],
+                [2, [4] + list_range(14, 16)],
+                [3, list_range(5, 8) + [12, 13, 14, 16]],
                 [4, [6, 8, 12, 17]],
                 [5, [7, 12, 14, 17]],
                 [6, [2, 7, 17]],
-                [7, [1, 3, 8, 17] + range(12, 16)],
-                [8, [2, 4, 5, 8, 12] + range(15, 17)],
+                [7, [1, 3, 8, 17] + list_range(12, 16)],
+                [8, [2, 4, 5, 8, 12] + list_range(15, 17)],
                 [9, [1, 3, 6, 7, 13]],
                 [10, [2, 14]],
                 [11, [3, 4, 14]],
@@ -1073,7 +1077,7 @@ class Main():
                 [14, [8, 9, 11, 12]],
                 [15, [8, 10, 11]],
                 [16, [7, 12]],
-                [17, range(7, 13)]
+                [17, list_range(7, 13)]
                ]
         dark = [[2, [5, 9, 10, 11]],
                 [6, [14, 15]],
@@ -1094,7 +1098,7 @@ class Main():
                 [7, [2, 11]],
                 [8, [3, 9, 10, 11]],
                 [9, [4, 5, 8, 9, 10, 11, 12]],
-                [10, range(4, 14)],
+                [10, list_range(4, 14)],
                 [11, [5, 6, 7, 8, 11, 12, 13]],
                 [12, [6, 7, 9, 10, 12, 13]],
                 [13, [9, 10, 11]],
@@ -1126,7 +1130,7 @@ class Main():
 
 
         # add signature and tool name
-        center = len(canvas) / 2
+        center = len(canvas) // 2
         toolname = u"boko.py"
         tooldescription = u"Application Hijack Scanner for macOS"
         signature = u"Jesse Nebling (@bashexplode)"
@@ -1135,9 +1139,9 @@ class Main():
         canvas[canvas_dimensions[0] - 1][center + 3] += signature
 
         # print canvas
-        for y in range(len(canvas)):
-            for x in range(len(canvas[y])):
-                print(canvas[x][y].encode('utf-8'), end='')
+        for y in list_range(len(canvas)):
+            for x in list_range(len(canvas[y])):
+                print(canvas[x][y], end='')
             print()
 
 
